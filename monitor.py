@@ -8,13 +8,16 @@ BOOKING_URL    = "https://broneering.mfa.ee/en/"
 EMBASSY_ID     = "40"        # New Delhi
 TARGET_SERVICE = "D-visa"
 
-def notify_phone(message):
-    requests.post(
-        f"https://ntfy.sh/{NTFY_TOPIC}",
-        data=message.encode("utf-8"),
-        headers={"Title": "D-VISA SLOT OPEN - BOOK NOW", "Priority": "urgent", "Tags": "rotating_light"},
-        timeout=10
-    )
+def notify_phone(title, message, priority="urgent"):
+    try:
+        requests.post(
+            f"https://ntfy.sh/{NTFY_TOPIC}",
+            data=message.encode("utf-8"),
+            headers={"Title": title, "Priority": priority, "Tags": "rotating_light"},
+            timeout=10
+        )
+    except Exception:
+        pass  # don't crash if ntfy fails
 
 def check_slot():
     session = requests.Session()
@@ -22,7 +25,7 @@ def check_slot():
     r = session.get(BOOKING_URL, timeout=15)
     token = BeautifulSoup(r.text, "html.parser").find("input", {"name": "broneering[_token]"})
     if not token:
-        print("CSRF token not found"); return False
+        raise ValueError("CSRF token not found — embassy site may have changed")
     r2 = session.post(BOOKING_URL, timeout=15, data={
         "broneering[esindus]": EMBASSY_ID,
         "broneering[isikuteArv]": "1",
@@ -36,10 +39,23 @@ def check_slot():
 
 ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 print(f"[{ts}] Checking New Delhi...", end=" ", flush=True)
-found = check_slot()
+
+try:
+    found = check_slot()
+except requests.exceptions.Timeout:
+    print("Website timed out — skipping this check.")
+    sys.exit(0)  # not a real failure, don't email
+except requests.exceptions.ConnectionError:
+    print("Connection error — skipping this check.")
+    sys.exit(0)
+except Exception as e:
+    print(f"Unexpected error: {e}")
+    sys.exit(0)  # still don't false-alarm on errors
+
 if found:
     print("SLOT FOUND!")
     notify_phone(
+        "D-VISA SLOT OPEN - BOOK NOW",
         "D-visa appointment slot is OPEN at Estonian Embassy New Delhi!\n\n"
         "Book NOW: https://broneering.mfa.ee/en/\n\n"
         "Personal ID: 39707150215\n"
@@ -48,6 +64,7 @@ if found:
         "AVOID: Aug 18-20 and Sep 16\n\n"
         f"Detected: {ts}"
     )
-    sys.exit(1)  # marks GitHub Actions run as failed -> sends you an email too
+    sys.exit(1)  # only exit(1) for a REAL slot — triggers GitHub failure email
 else:
     print("No slot yet.")
+    sys.exit(0)
