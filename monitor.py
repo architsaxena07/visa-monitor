@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 NTFY_TOPIC     = "archit-dvisa-2026"
 BOOKING_URL    = "https://broneering.mfa.ee/en/"
-EMBASSY_ID     = "40"
+EMBASSY_ID     = "244"   # TEST: Abu Dhabi (has slots) — change back to "40" for New Delhi
 TARGET_SERVICE = "Long stay visa"
 
 def notify_phone(message):
@@ -35,17 +35,17 @@ def check_slot():
     return any(TARGET_SERVICE.lower() in o.lower() for o in options)
 
 ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-print(f"[{ts}] Checking...", end=" ")
+print(f"[{ts}] Checking Abu Dhabi (TEST)...", end=" ")
 found = check_slot()
 if found:
-    print("🚨 SLOT FOUND!")
+    print("✅ Slot found!")
     notify_phone(
-        f"D-visa slot OPEN at Estonian Embassy New Delhi!\n"
-        f"Book NOW: {BOOKING_URL}\n\n"
-        f"Personal ID: 39707150215 | App: 2026052733\n"
-        f"Description: Bolt Technology OÜ employee, STER 1066457755 (12.10-11.10.2027)\n"
-        f"❌ Avoid Aug 18-20 and Sep 16"
+        "✅ TEST SUCCESSFUL — Bot is working!\n\n"
+        "This was a test using Abu Dhabi embassy.\n"
+        "The bot is now switched back to monitor New Delhi.\n"
+        "You will get a real alert when New Delhi slot opens."
     )
-    sys.exit(1)  # non-zero exit so GitHub Actions marks run as failed → sends you an email too
+    sys.exit(0)
 else:
-    print("No slot yet.")
+    print("No slot found (unexpected for Abu Dhabi — check manually)")
+    sys.exit(1)
