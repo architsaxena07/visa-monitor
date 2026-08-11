@@ -41,8 +41,8 @@ else:
     msg = (
         f"Daily summary for {today}\n\n"
         f"New Delhi: No D-visa slot yet.\n"
-        f"Bot checked every 5 mins all day. System working fine.\n\n"
-        f"288 checks done today. Still watching."
+        f"Bot is running every 5 mins on GitHub servers. System working fine.\n\n"
+        f"Still watching. You will be alerted the moment a slot opens."
     )
 
 requests.post(
