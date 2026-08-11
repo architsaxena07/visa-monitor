@@ -6,13 +6,17 @@ from bs4 import BeautifulSoup
 NTFY_TOPIC     = "archit-dvisa-2026"
 BOOKING_URL    = "https://broneering.mfa.ee/en/"
 EMBASSY_ID     = "244"   # TEST: Abu Dhabi — change to "40" for New Delhi after test
-TARGET_SERVICE = "D-visa"  # matches "Long-stay visa (D-visa) application"
+TARGET_SERVICE = "D-visa"
 
 def notify_phone(message):
     requests.post(
         f"https://ntfy.sh/{NTFY_TOPIC}",
         data=message.encode("utf-8"),
-        headers={"Title": "🚨 D-VISA SLOT OPEN — BOOK NOW!", "Priority": "urgent", "Tags": "rotating_light"},
+        headers={
+            "Title": "D-VISA SLOT OPEN - BOOK NOW",   # ASCII only in headers
+            "Priority": "urgent",
+            "Tags": "rotating_light"
+        },
         timeout=10
     )
 
@@ -38,14 +42,15 @@ ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 print(f"[{ts}] Checking Abu Dhabi (TEST)...", end=" ", flush=True)
 found = check_slot()
 if found:
-    print("✅ Slot detected!")
+    print("SLOT FOUND - sending phone notification...")
     notify_phone(
-        "✅ TEST PASSED — Bot is working!\n\n"
-        "This was a test using Abu Dhabi embassy (which has slots).\n"
-        "The bot will now be switched back to monitor New Delhi.\n"
-        "You'll get a real alert like this when New Delhi slot opens."
+        "TEST PASSED - Bot is working!\n\n"
+        "This was a test using Abu Dhabi embassy (has slots).\n"
+        "Bot is now switched to monitor New Delhi.\n"
+        "You will get a real alert when New Delhi slot opens.\n\n"
+        "Avoid: Aug 18-20 and Sep 16"
     )
-    sys.exit(0)
+    print("Done. Check your phone!")
 else:
-    print("❌ No slot detected (check failed)")
+    print("No slot detected")
     sys.exit(1)
