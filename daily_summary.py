@@ -41,7 +41,7 @@ else:
     msg = (
         f"Daily summary for {today}\n\n"
         f"New Delhi: No D-visa slot yet.\n"
-        f"Bot is running every 5 mins on GitHub servers. System working fine.\n\n"
+        f"Bot is running every 1 min on GitHub servers. System working fine.\n\n"
         f"Still watching. You will be alerted the moment a slot opens."
     )
 
